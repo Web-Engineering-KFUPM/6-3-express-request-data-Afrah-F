@@ -104,23 +104,66 @@ LAB SETUP INSTRUCTIONS
  *
  */
 
+
 import express from "express";
+
 const app = express();
 
 
-// create server
+app.get("/", (req, res) => {
+    res.status(200).json({ ok: true, msg: "Server is up" });
+});
+app.listen(3000, () => {
 
+    console.log("API running at http://localhost:3000");
+});
 
-// Query params: /echo?name=Ali&age=22
+// ---------------------------
+// TODO-2: /echo (query params)
 
+// ---------------------------
+// /echo?name=Ali&age=22
+app.get("/echo", (req, res) => {
+    const { name, age } = req.query;
+    if (!name || !age) {
+        return res.status(400).json({ ok: false, error: "name & age required" });
+    }
+    return res.json({
+        ok: true,
+        name,
+        age,
+        msg: `Hello ${name}, you are ${age}`,
+    });
+});
 
-// Route params: /profile/First/Last
+// ---------------------------
+// TODO-3: /profile/:first/:last (route params)
+// ---------------------------
+app.get("/profile/:first/:last", (req, res) => {
+    const { first, last } = req.params;
+    return res.json({ ok: true, fullName: `${first} ${last}` });
+});
 
+// ---------------------------
+// TODO-4: app.param('userId', ...) (param middleware)
+// ---------------------------
+app.param("userId", (req, res, next, userId) => {
+    const num = Number(userId);
+    // Must be a positive number (integer check optional, but good)
+    if (!Number.isFinite(num) || num <= 0) {
+        return res
+            .status(400)
+            .json({ ok: false, error: "userId must be positive number" });
+    }
+    req.userIdNum = Math.trunc(num);
+    next();
+});
 
-// Route param middleware example: /users/42
+// ---------------------------
+// TODO-5: /users/:userId
+// ---------------------------
+app.get("/users/:userId", (req, res) => {
+    return res.json({ ok: true, userId: req.userIdNum });
+});
 
-
-// Route params: /users/:userId route
-
-
-
+export default app;
